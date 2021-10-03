@@ -20,35 +20,74 @@ Section 2.3 in the Hitchhiker's Guide. -/
 
 lemma I (a : Prop) :
   a → a :=
-sorry
+begin
+  intro ha,
+  apply ha
+end
 
 lemma K (a b : Prop) :
   a → b → b :=
-sorry
+begin
+  intros ha hb,
+  exact hb
+end  
 
 lemma C (a b c : Prop) :
   (a → b → c) → b → a → c :=
-sorry
+begin
+  intros habc hb ha,
+  apply habc,
+  exact ha,
+  exact hb,
+end
 
 lemma proj_1st (a : Prop) :
   a → a → a :=
-sorry
+begin
+  intros ha1 ha2,
+  exact ha1,
+end
+
 
 /-! Please give a different answer than for `proj_1st`: -/
 
 lemma proj_2nd (a : Prop) :
   a → a → a :=
-sorry
+begin
+  intros ha1 ha2,
+  exact ha2,
+end
+
 
 lemma some_nonsense (a b c : Prop) :
   (a → b → c) → a → (a → c) → b → c :=
-sorry
+begin
+  intros hg ha hac hb,
+  apply hac,
+  exact ha,
+end
+
+
 
 /-! 1.2. Prove the contraposition rule using basic tactics. -/
 
 lemma contrapositive (a b : Prop) :
   (a → b) → ¬ b → ¬ a :=
-sorry
+begin
+  intros hab hnb ha,
+  have hb := hab ha,
+  exact hnb hb,
+end
+
+lemma contrapositive2 (a b : Prop) :
+  (a → b) → ¬ b → ¬ a :=
+begin
+  intros hab hnb ha,
+  apply hnb,
+  apply hab,
+  apply ha
+end
+
 
 /-! 1.3. Prove the distributivity of `∀` over `∧` using basic tactics.
 
@@ -58,7 +97,47 @@ necessary. -/
 
 lemma forall_and {α : Type} (p q : α → Prop) :
   (∀x, p x ∧ q x) ↔ (∀x, p x) ∧ (∀x, q x) :=
-sorry
+begin
+  apply iff.intro,
+  -- left to right
+  {intro h,
+  apply and.intro,
+  { intro x,
+    have hpq, from h x,
+    exact hpq.left},
+  { intro x,
+    have hpq, from h x,
+    exact hpq.right}},
+
+--right to left
+  { intros h x,
+    apply and.intro,
+  { have hl, from h.left,
+    exact hl x,},
+  { have hr, from h.right,
+    exact hr x}
+  }
+end
+
+lemma forall_and2 {α : Type} (p q : α → Prop) :
+  (∀x, p x ∧ q x) ↔ (∀x, p x) ∧ (∀x, q x) :=
+begin
+  apply iff.intro,
+  { intro h,
+    apply and.intro,
+    { intro x,
+      apply and.elim_left ,
+      apply h },
+    { intro x,
+      apply and.elim_right,
+      apply h } },
+  { intros h x,
+    apply and.intro,
+    { apply and.elim_left,
+    simp [h] },
+    { apply and.elim_right h } }
+end
+
 
 
 /-! ## Question 2: Natural Numbers
@@ -67,14 +146,26 @@ sorry
 `mul` operator defined in lecture 1. -/
 
 #check mul
+#eval mul 2 3
+#check add
 
 lemma mul_zero (n : ℕ) :
   mul 0 n = 0 :=
-sorry
+begin
+  induction' n,
+  { refl },
+  { simp [add, mul, ih] }
+end
+
 
 lemma mul_succ (m n : ℕ) :
   mul (nat.succ m) n = add (mul m n) n :=
-sorry
+begin
+  induction' n,
+  {refl},
+  { simp [add, add_succ, add_assoc, mul, ih]}
+end
+
 
 /-! 2.2. Prove commutativity and associativity of multiplication using the
 `induction'` tactic. Choose the induction variable carefully. -/
